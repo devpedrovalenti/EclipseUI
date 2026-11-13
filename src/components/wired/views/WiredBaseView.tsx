@@ -11,11 +11,12 @@ export interface WiredBaseViewProps
     hasSpecialInput: boolean;
     save: () => void;
     validate?: () => boolean;
+    className?: string;
 }
 
 export const WiredBaseView: FC<PropsWithChildren<WiredBaseViewProps>> = props =>
 {
-    const { wiredType = '', requiresFurni = WiredFurniType.STUFF_SELECTION_OPTION_NONE, save = null, validate = null, children = null, hasSpecialInput = false } = props;
+    const { wiredType = '', requiresFurni = WiredFurniType.STUFF_SELECTION_OPTION_NONE, save = null, validate = null, children = null, hasSpecialInput = false, className = '' } = props;
     const [ wiredName, setWiredName ] = useState<string>(null);
     const [ wiredDescription, setWiredDescription ] = useState<string>(null);
     const [ needsSave, setNeedsSave ] = useState<boolean>(false);
@@ -86,7 +87,7 @@ export const WiredBaseView: FC<PropsWithChildren<WiredBaseViewProps>> = props =>
     }, [ trigger, hasSpecialInput, requiresFurni, setIntParams, setStringParam, setFurniIds, setAllowsFurni ]);
 
     return (
-        <NitroCardView uniqueKey="nitro-wired" className="nitro-wired" theme="primary-slim">
+        <NitroCardView uniqueKey="nitro-wired" className={ `nitro-wired${ className ? ` ${ className }` : '' }` } theme="primary-slim">
             <NitroCardHeaderView headerText={ LocalizeText('wiredfurni.title') } onCloseClick={ onClose } />
             <NitroCardContentView>
                 <Column gap={ 1 }>
