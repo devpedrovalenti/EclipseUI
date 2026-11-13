@@ -1,0 +1,48 @@
+.nitro-room-builder {
+    width: 335px;
+    height: min(755px, calc(100vh - 12px));
+    max-height: calc(100vh - 12px);
+    color: #353a3e;
+    font-size: 14px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, .45);
+
+    .room-builder-content { flex: 1 1 auto; min-height: 0; padding: 5px 10px 6px; overflow-y: auto; background: #dedede; }
+    .builder-selected-furniture { display: flex; align-items: center; gap: 10px; min-height: 42px; margin: 0 2px 2px; color: #25292c; font-size: 15px; }
+    .builder-selected-furniture img { flex: 0 0 40px; width: 40px; height: 40px; object-fit: contain; image-rendering: auto; }
+    .builder-selected-furniture span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .builder-section { margin: 0 0 2px; }
+    .builder-section-title { display: flex; justify-content: space-between; align-items: center; width: 100%; min-height: 24px; padding: 1px; border: 0; color: #25292c; background: transparent; text-align: left; font-size: 14px; font-weight: 600; }
+    .builder-section-title span { font-size: 18px; line-height: 1; }
+    .builder-toggle-row { position: relative; display: flex; align-items: center; gap: 8px; min-height: 25px; margin: 0; color: #555b5f; cursor: pointer; font-size: 14px; }
+    .builder-toggle-row > input[type=checkbox] { position: absolute; opacity: 0; }
+    .builder-switch { position: relative; flex: 0 0 46px; height: 22px; border: 1px solid #c12329; border-radius: 14px; background: #d83239; transition: background .12s; }
+    .builder-switch:after { content: ''; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; border-radius: 50%; background: #fff; box-shadow: 0 1px 2px rgba(0,0,0,.25); transition: transform .12s; }
+    .builder-toggle-row input:checked + .builder-switch { border-color: #147c96; background: #159bb5; }
+    .builder-toggle-row input:checked + .builder-switch:after { transform: translateX(23px); }
+    .builder-toggle-row input:focus-visible + .builder-switch { outline: 2px solid #197dba; outline-offset: 2px; }
+    .builder-toggle-label { flex: 1; }
+    .builder-setting-row { display: flex; align-items: center; gap: 6px; min-height: 32px; }
+    .builder-setting-row .builder-toggle-row { flex: 1; min-width: 0; }
+    .builder-stepper { display: flex; align-items: stretch; height: 28px; }
+    .builder-number { width: 78px; min-width: 0; height: 28px; padding: 2px 7px; color: #30363a; background: #fff; border: 1px solid #aab0b4; border-radius: 3px 0 0 3px; text-align: center; font-size: 14px; }
+    .builder-stepper > span { display: flex; flex-direction: column; width: 22px; }
+    .builder-stepper button { flex: 1; display: grid; place-items: center; padding: 0; color: #fff; background: #168eaa; border: 1px solid #0f7189; font-size: 10px; }
+    .builder-stepper button:first-child { border-radius: 0 4px 0 0; }
+    .builder-stepper button:last-child { border-radius: 0 0 4px 0; }
+    .builder-direction { display: flex; gap: 6px; margin: 5px 0 6px; }
+    .builder-direction button { flex: 1; height: 37px; display: grid; place-items: center; color: #a9adb0; background: #e7e7e7; border: 1px solid #ececec; border-radius: 5px; font-size: 17px; }
+    .builder-direction button:hover { color: #4e585e; background: #f1f1f1; }
+    .builder-avatar-tools { color: #353a3e; }
+    .builder-server-status { margin: 4px 0; padding: 4px 7px; color: #34414a; background: #edf3f5; border: 1px solid #b7c7cd; border-radius: 3px; overflow-wrap: anywhere; font-size: 12px; }
+    .builder-bottom-actions { display: flex; gap: 8px; margin: 6px 0; }
+    .builder-bottom-actions button { flex: 1; height: 34px; border: 1px solid #979da0; border-radius: 4px; color: #fff; font-size: 14px; font-weight: 700; }
+    .builder-clear { background: #999; }
+    .builder-save { background: #148eaa; border-color: #0b718b !important; }
+    .builder-floor { width: 100%; min-height: 35px; padding: 4px 6px; color: #fff; background: #292929; border: 1px solid #111; border-radius: 4px; font-size: 14px; font-weight: 700; }
+    .builder-help { display: block; margin-top: 4px; color: #25292c; text-align: center; font-size: 12px; text-decoration: underline; }
+
+    @media (max-width: 360px) {
+        width: calc(100vw - 12px);
+        .builder-number { width: 70px; }
+    }
+}

@@ -1,0 +1,111 @@
+.user-profile {
+    width: min(590px, 94vw);
+    height: min(760px, 88vh);
+
+    .user-profile-content { position: relative; overflow-y: auto !important; color: #161616; }
+
+    .profile-banner-wrap {
+        position: relative;
+        margin: -4px -4px 8px;
+    }
+
+    .profile-badge-row {
+        position: absolute;
+        z-index: 3;
+        right: 10px;
+        bottom: 10px;
+        display: flex;
+        min-height: 42px;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 4px;
+        padding: 2px 8px;
+        border: 1px solid rgba(80, 87, 92, .18);
+        border-radius: 6px;
+        background: rgba(105, 111, 116, .42);
+        backdrop-filter: blur(2px);
+
+        > .flex-column {
+            width: 40px;
+            min-width: 34px;
+            height: 38px;
+            align-items: center;
+            justify-content: center;
+            gap: 0;
+        }
+    }
+
+    .profile-banner {
+        position: relative;
+        height: 140px;
+        border: 1px solid rgba(0, 0, 0, .18);
+        border-radius: 4px;
+        background: linear-gradient(110deg, #a9c5d1, #d7e2e6);
+        background-position: center;
+        background-size: cover;
+    }
+
+    .profile-banner-button {
+        position: absolute;
+        right: 6px;
+        top: 5px;
+        padding: 3px 8px;
+        border: 1px solid #c3cbd0;
+        border-radius: 4px;
+        background: rgba(255, 255, 255, .94);
+        color: #343b40;
+        font-size: 11px;
+        cursor: pointer;
+    }
+
+    .profile-main-grid { min-height: 148px; margin-bottom: 6px; }
+
+    .user-container {
+        border-right: 1px solid #92999d;
+
+        .avatar-container { width: 75px; height: 120px; }
+    }
+
+    .rooms-button-container {
+        min-height: 32px;
+        margin: 0 0 8px;
+        padding: 5px 8px;
+        border: 1px solid #aab1b5;
+        border-radius: 4px;
+        background: rgba(255, 255, 255, .45);
+    }
+
+    .user-relationship {
+        height: 25px;
+
+        .avatar-image-container {
+            width: 50px;
+            height: 50px;
+
+            .avatar-image { top: 20px; right: -8px; }
+        }
+    }
+
+    .user-relationship-count { margin-top: 2px; margin-left: 5px; color: #777 !important; }
+
+    .user-groups-container {
+        .layout-grid-item { width: 50px; }
+    }
+
+    .profile-main-grid + .rooms-button-container + .grid { min-height: 185px; }
+
+    .no-group-spritesheet {
+        background: transparent url('@/assets/images/groups/no-group-spritesheet.png') no-repeat;
+
+        &.image-1 { width: 95px; height: 136px; background-position: -3px -3px; }
+        &.image-2 { width: 95px; height: 136px; background-position: -104px -3px; }
+        &.image-3 { width: 95px; height: 136px; background-position: -205px -3px; }
+    }
+}
+
+@media (max-width: 600px) {
+    .user-profile {
+        .profile-badge-row { right: 6px; bottom: 6px; gap: 1px; padding: 2px 4px; }
+        .profile-banner { height: min(350px, 55vh); }
+    }
+}
