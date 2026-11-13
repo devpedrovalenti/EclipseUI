@@ -5,7 +5,6 @@ import { AddEventLinkTracker, CreateLinkEvent, GetFurnitureDataForRoomObject, Ge
 import { LayoutFurniIconImageView, NitroCardContentView, NitroCardHeaderView, NitroCardView } from '../../common';
 import { useMessageEvent, useObjectSelectedEvent, useRoomEngineEvent } from '../../hooks';
 import { RegisterRoomBuilderMessages, RoomBuilderComposer, RoomBuilderResultEvent } from '../../api/room-builder';
-import { SetRoomBuilderTeleportEnabled } from '../../api/nitro/room/DispatchMouseEvent';
 
 type ToggleKey = 'autoHeight' | 'keepHeight' | 'viewHeight' | 'freezeAvatar' | 'teleport' | 'changeEqual' | 'rotateEqual' | 'chooseEqual' | 'copyPile' | 'movePile' | 'choosePile' | 'organizeWired';
 type PendingEqualAction = { type: 'rotate'; direction: number } | { type: 'state'; state: number };
@@ -36,6 +35,7 @@ export const RoomBuilderView: FC<{}> = () =>
     const pendingRequest = useRef(false);
     const requestTimeout = useRef<ReturnType<typeof setTimeout>>(null);
     const pendingAvatarFrozen = useRef<boolean>(null);
+    const pendingTeleportEnabled = useRef<boolean>(null);
     const pendingEqualAction = useRef<PendingEqualAction>(null);
     const batchTimer = useRef<ReturnType<typeof setTimeout>>(null);
     const furnitureStateRef = useRef(furnitureState);
@@ -63,12 +63,6 @@ export const RoomBuilderView: FC<{}> = () =>
         else setServerMessage(message);
     }, []);
 
-    useEffect(() =>
-    {
-        SetRoomBuilderTeleportEnabled(teleportEnabled);
-        return () => SetRoomBuilderTeleportEnabled(false);
-    }, [teleportEnabled]);
-
     const requestBuilder = useCallback((action: number, ...fields: (number | boolean | Short)[]) =>
     {
         if (pendingRequest.current && action !== 4) return;
@@ -83,6 +77,8 @@ export const RoomBuilderView: FC<{}> = () =>
         {
             pendingActions.current = [];
             pendingEqualAction.current = null;
+            pendingAvatarFrozen.current = null;
+            pendingTeleportEnabled.current = null;
             pendingRequest.current = false;
             setRequestPending(false);
             setServerMessage('O servidor não respondeu à solicitação.');
@@ -99,6 +95,7 @@ export const RoomBuilderView: FC<{}> = () =>
         setRequestPending(pendingRequest.current);
         if (pendingRequest.current) requestTimeout.current = setTimeout(() => { pendingActions.current = []; pendingRequest.current = false; setRequestPending(false); setServerMessage('O servidor nao respondeu.'); }, 10000);
         if (!parser.success && completedAction === 5) pendingAvatarFrozen.current = null;
+        if (!parser.success && completedAction === 6) pendingTeleportEnabled.current = null;
         if (!parser.success && completedAction === 2) pendingEqualAction.current = null;
         if (!parser.success)
         {
@@ -144,13 +141,24 @@ export const RoomBuilderView: FC<{}> = () =>
         }
         if (completedAction === 6)
         {
-            setServerMessage('Solicitacao de teleporte concluida.');
+            if (pendingTeleportEnabled.current !== null) setTeleportEnabled(pendingTeleportEnabled.current);
+            setServerMessage(pendingTeleportEnabled.current ? 'Modo de teleporte ativado. Clique em um piso para teleportar.' : 'Modo de teleporte desativado.');
+            pendingTeleportEnabled.current = null;
             return;
         }
         if (completedAction === 7)
         {
             setSelectionIds(parser.itemIds);
             setServerMessage(parser.itemIds.length ? `${parser.itemIds.length} mobília(s) nao puderam ser recolhidas: ${parser.itemIds.join(', ')}` : 'Todas as mobilias iguais foram recolhidas.');
+            return;
+        }
+        if (completedAction === 12)
+        {
+            setAvatarFrozen(false);
+            setTeleportEnabled(false);
+            pendingAvatarFrozen.current = null;
+            pendingTeleportEnabled.current = null;
+            setServerMessage('Modos temporários e valores da ferramenta foram limpos.');
             return;
         }
         setServerMessage(parser.itemIds.length ? `${parser.itemIds.length} mobília(s) selecionada(s).` : 'Acesso à ferramenta autorizado.');
@@ -226,22 +234,6 @@ export const RoomBuilderView: FC<{}> = () =>
         }
     });
 
-    useEffect(() =>
-    {
-        if (!teleportEnabled || ownHabboId < 1) return;
-
-        const onRoomTileClick = (event: Event) =>
-        {
-            const { x, y } = (event as CustomEvent<{ x: number; y: number }>).detail;
-            if (!Number.isInteger(x) || !Number.isInteger(y) || requestPending) return;
-
-            requestBuilder(6, ownHabboId, x, y);
-        };
-
-        window.addEventListener('room-builder:tile-click', onRoomTileClick);
-        return () => window.removeEventListener('room-builder:tile-click', onRoomTileClick);
-    }, [teleportEnabled, ownHabboId, requestPending, requestBuilder]);
-
     useRoomEngineEvent<RoomEngineEvent>(RoomEngineEvent.DISPOSED, () => setVisible(false));
     useEffect(() =>
     {
@@ -291,14 +283,36 @@ export const RoomBuilderView: FC<{}> = () =>
         if(selectedFurnitureId < 1) { setServerMessage('Selecione uma mobília no quarto primeiro.'); return; }
         action(selectedFurnitureId);
     };
+    const toggleAvatarFreeze = (active: boolean) =>
+    {
+        pendingAvatarFrozen.current = active;
+        requestBuilder(5, active);
+    };
+    const toggleBuilderTeleport = (active: boolean) =>
+    {
+        if(ownHabboId < 1)
+        {
+            setServerMessage('Não foi possível identificar seu avatar.');
+            return;
+        }
+
+        pendingTeleportEnabled.current = active;
+        requestBuilder(6, active);
+    };
     const clearTool = () =>
     {
+        if(pendingRequest.current)
+        {
+            setServerMessage('Aguarde a solicitação atual antes de limpar a ferramenta.');
+            return;
+        }
+
+        requestBuilder(12);
         setEnabled(value => ({ ...value, autoHeight: false, changeEqual: false, rotateEqual: false, chooseEqual: false, copyPile: false, movePile: false }));
         setPlacementHeightEnabled(false);
         setStateEnabled(false);
         setViewHeightEnabled(false);
         setViewStateEnabled(false);
-        setTeleportEnabled(false);
         setHeight(0);
         setAutomaticHeight(0);
         setFurnitureState(0);
@@ -341,8 +355,8 @@ export const RoomBuilderView: FC<{}> = () =>
             <section className="builder-section">
                 {sectionTitle('Ações com personagem', 'avatar')}
                 {open.avatar && <>
-                    {toggleRow('Congelar Habbo', 'freezeAvatar', avatarFrozen, active => { pendingAvatarFrozen.current = active; requestBuilder(5, ownHabboId, active); }, ownHabboId < 1 || requestPending)}
-                    {toggleRow('Teleportar', 'teleport', teleportEnabled, active => { if(ownHabboId < 1) { setServerMessage('Não foi possível identificar seu avatar.'); return; } setTeleportEnabled(active); }, ownHabboId < 1)}
+                    {toggleRow('Congelar Habbo', 'freezeAvatar', avatarFrozen, toggleAvatarFreeze, ownHabboId < 1 || requestPending)}
+                    {toggleRow('Teleportar', 'teleport', teleportEnabled, toggleBuilderTeleport, ownHabboId < 1 || requestPending)}
                 </>}
             </section>
 
